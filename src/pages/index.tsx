@@ -3,6 +3,7 @@ import styles from '@/styles/Home.module.css'
 import path from 'path'
 import { getPdfData, Words } from 'utils'
 import { useMemo, useState } from 'react'
+import { Button, Input } from 'antd'
 
 
 export async function getStaticProps() {
@@ -16,10 +17,10 @@ export async function getStaticProps() {
 }
 
 export default function Home({words}: {words: Words}) {
-  const [mode,setMode] = useState<'e-c'|'c-e'>('e-c')
+  const [mode,setMode] = useState<'e-c'|'c-e'>('c-e')
+  const [showAnswer,setShowAnswer] = useState<boolean>(false)
   const renderWords = useMemo(() => words.map(item => mode === 'c-e' ? [item[1],item[0]] : item ),[mode])
   const changeMode = () => mode === 'e-c' ? setMode('c-e') : setMode('e-c')
-  console.log(renderWords)
   return (
     <>
       <Head>
@@ -29,14 +30,18 @@ export default function Home({words}: {words: Words}) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <button onClick={changeMode}>切换顺序</button>
+        <div className={styles.btnWrapper}>
+          <Button className={styles.switch} size='small' onClick={changeMode}>switch</Button>
+          <Button type="primary" size='small' onClick={() => setShowAnswer(!showAnswer)}>Show Answer</Button>
+        </div>
         {/* TODO这里key如果是item[0] 就会出现渲染问题，为什么? */}
         <ul className='wrapper'>
           {
             renderWords.map((item,idx) => <li className={styles.line} key={item[0] + item[1]}>
               <span className={styles.index}>{idx + 1}</span>
               <span className={styles.word}>{item[0]}</span>
-              <span className={styles.explain}>{item[1]}</span>
+              <Input style={{width: '120px'}} size="small"/>
+              {showAnswer && <span className={styles.explain}>{item[1]}</span>}
             </li>)
           }
         </ul>
