@@ -1,7 +1,7 @@
 import pdf from 'pdf-parse'
 import fs from 'fs'
 
-export type Words = {c: string, e: string, key: number}[]
+export type Words = {c: string, e: string, key: string}[]
 
 function removeSpace(str: string) {
   return str.replace(/\u200B/g,'')

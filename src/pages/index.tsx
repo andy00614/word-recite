@@ -2,12 +2,13 @@ import Head from 'next/head'
 import styles from '@/styles/Home.module.css'
 import path from 'path'
 import { getPdfData, Words } from 'utils'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button, Input } from 'antd'
 import store from 'store2'
 import classNames from 'clsx'
 
 const CHECK_CACHE_NAME = 'CHECK_CACHE_NAME'
+const INPUT_VALUE_CACHE_NAME = 'INPUT_VALUE_CACHE_NAME'
 
 export async function getStaticProps() {
   const pdfPath = path.resolve(process.cwd(), 'public', 'word.pdf')
@@ -21,19 +22,29 @@ export async function getStaticProps() {
 
 export default function Home({ words }: { words: Words }) {
   const [mode, setMode] = useState<'e-c' | 'c-e'>('c-e')
-  const [isFilterMode,setIsFilterMode] = useState<boolean>(false)
+  const [isFilterMode, setIsFilterMode] = useState<boolean>(false)
   const [showAnswer, setShowAnswer] = useState<boolean>(false)
   const changeMode = () => mode === 'e-c' ? setMode('c-e') : setMode('e-c')
-  const [checks, setChecks] = useState<Record<number, boolean>>({})
+  const [checks, setChecks] = useState<Record<string, boolean>>({})
+  const [inputValue, setInputValue] = useState<Record<string, string>>({})
 
   useEffect(() => {
-    const t = store.get(CHECK_CACHE_NAME) || {}
-    setChecks(t)
-  },[])
+    const checkCache = store.get(CHECK_CACHE_NAME) || {}
+    setChecks(checkCache)
+    const inputCache = store.get(INPUT_VALUE_CACHE_NAME) || {}
+    setInputValue(inputCache)
+  }, [])
 
   const changeChecks = (checks: Record<number, boolean>) => {
     setChecks(checks)
     store.set(CHECK_CACHE_NAME, checks)
+  }
+
+  const handleInput = (key: string, v: string) => {
+    const newInputValue = { ...inputValue }
+    newInputValue[key] = v
+    setInputValue(newInputValue)
+    store.set(INPUT_VALUE_CACHE_NAME, newInputValue)
   }
 
   const renderData = useMemo(() => {
@@ -41,22 +52,22 @@ export default function Home({ words }: { words: Words }) {
       return words.filter(item => !checks[item.key])
     }
     return words
-  },[isFilterMode])
+  }, [isFilterMode])
 
-  const checkAnswer = useCallback(() => {
+  const checkAnswer = () => {
     const inputs = document.querySelectorAll('input')
     const newChecks = { ...checks }
     inputs.forEach((input, idx) => {
       const value = input.value
       if (value) {
-        console.log(idx,value)
+        console.log(idx, value)
         const word = renderData[idx]
         const isCorrect = mode === 'c-e' ? word.e.toLowerCase() === value.toLowerCase() : word.c.toLowerCase() === value.toLowerCase()
         newChecks[word.key] = isCorrect
       }
     })
     changeChecks(newChecks)
-  },[isFilterMode])
+  }
 
   return (
     <>
@@ -77,9 +88,9 @@ export default function Home({ words }: { words: Words }) {
         <ul className='wrapper'>
           {
             renderData.map((item, idx) => <li className={styles.line} key={item.key}>
-              <span className={classNames({[styles.index]: true,[styles.remeber]: checks[item.key]})}>{idx + 1}</span>
+              <span className={classNames({ [styles.index]: true, [styles.remeber]: checks[item.key] })}>{idx + 1}</span>
               <span title={item.e} className={styles.word}>{mode === 'c-e' ? item.c : item.e}</span>
-              <Input style={{ width: '120px' }} size="small" onBlur={checkAnswer}/>
+              <Input value={inputValue[item.key]} onChange={(e) => handleInput(item.key, e.target.value)} style={{ width: '120px' }} size="small" onBlur={checkAnswer} />
               {showAnswer && <span className={styles.explain}>{mode === 'e-c' ? item.c : item.e}</span>}
             </li>)
           }
