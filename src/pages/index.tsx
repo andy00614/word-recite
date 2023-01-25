@@ -27,7 +27,7 @@ export default function Home({ words }: { words: Words }) {
   const [checks, setChecks] = useState<Record<number, boolean>>({})
 
   useEffect(() => {
-    const t = store.get(CHECK_CACHE_NAME)
+    const t = store.get(CHECK_CACHE_NAME) || {}
     setChecks(t)
   },[])
 
