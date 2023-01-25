@@ -2,9 +2,12 @@ import Head from 'next/head'
 import styles from '@/styles/Home.module.css'
 import path from 'path'
 import { getPdfData, Words } from 'utils'
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Input } from 'antd'
+import store from 'store2'
+import classNames from 'clsx'
 
+const CHECK_CACHE_NAME = 'CHECK_CACHE_NAME'
 
 export async function getStaticProps() {
   const pdfPath = path.resolve(process.cwd(), 'public', 'word.pdf')
@@ -16,11 +19,45 @@ export async function getStaticProps() {
   }
 }
 
-export default function Home({words}: {words: Words}) {
-  const [mode,setMode] = useState<'e-c'|'c-e'>('c-e')
-  const [showAnswer,setShowAnswer] = useState<boolean>(false)
-  const renderWords = useMemo(() => words.map(item => mode === 'c-e' ? [item[1],item[0]] : item ),[mode])
+export default function Home({ words }: { words: Words }) {
+  const [mode, setMode] = useState<'e-c' | 'c-e'>('c-e')
+  const [isFilterMode,setIsFilterMode] = useState<boolean>(false)
+  const [showAnswer, setShowAnswer] = useState<boolean>(false)
   const changeMode = () => mode === 'e-c' ? setMode('c-e') : setMode('e-c')
+  const [checks, setChecks] = useState<Record<number, boolean>>({})
+
+  useEffect(() => {
+    const t = store.get(CHECK_CACHE_NAME)
+    setChecks(t)
+  },[])
+
+  const changeChecks = (checks: Record<number, boolean>) => {
+    setChecks(checks)
+    store.set(CHECK_CACHE_NAME, checks)
+  }
+
+  const renderData = useMemo(() => {
+    if (isFilterMode) {
+      return words.filter(item => !checks[item.key])
+    }
+    return words
+  },[isFilterMode])
+
+  const checkAnswer = useCallback(() => {
+    const inputs = document.querySelectorAll('input')
+    const newChecks = { ...checks }
+    inputs.forEach((input, idx) => {
+      const value = input.value
+      if (value) {
+        console.log(idx,value)
+        const word = renderData[idx]
+        const isCorrect = mode === 'c-e' ? word.e.toLowerCase() === value.toLowerCase() : word.c.toLowerCase() === value.toLowerCase()
+        newChecks[word.key] = isCorrect
+      }
+    })
+    changeChecks(newChecks)
+  },[isFilterMode])
+
   return (
     <>
       <Head>
@@ -32,16 +69,18 @@ export default function Home({words}: {words: Words}) {
       <main className={styles.main}>
         <div className={styles.btnWrapper}>
           <Button className={styles.switch} size='small' onClick={changeMode}>switch</Button>
-          <Button type="primary" size='small' onClick={() => setShowAnswer(!showAnswer)}>Show Answer</Button>
+          <Button className={styles.switch} type="primary" size='small' onClick={() => setShowAnswer(!showAnswer)}>Show Answer</Button>
+          <Button className={styles.switch} disabled={mode === 'e-c'} type="primary" size='small' onClick={checkAnswer}>Check</Button>
+          <Button className={styles.switch} size='small' onClick={() => setIsFilterMode(!isFilterMode)}>Filter</Button>
         </div>
         {/* TODO这里key如果是item[0] 就会出现渲染问题，为什么? */}
         <ul className='wrapper'>
           {
-            renderWords.map((item,idx) => <li className={styles.line} key={item[0] + item[1]}>
-              <span className={styles.index}>{idx + 1}</span>
-              <span className={styles.word}>{item[0]}</span>
-              <Input style={{width: '120px'}} size="small"/>
-              {showAnswer && <span className={styles.explain}>{item[1]}</span>}
+            renderData.map((item, idx) => <li className={styles.line} key={item.key}>
+              <span className={classNames({[styles.index]: true,[styles.remeber]: checks[item.key]})}>{idx + 1}</span>
+              <span title={item.e} className={styles.word}>{mode === 'c-e' ? item.c : item.e}</span>
+              <Input style={{ width: '120px' }} size="small" onBlur={checkAnswer}/>
+              {showAnswer && <span className={styles.explain}>{mode === 'e-c' ? item.c : item.e}</span>}
             </li>)
           }
         </ul>

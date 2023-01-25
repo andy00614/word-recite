@@ -9,7 +9,7 @@
   align-items: center;
   justify-content: center;
   flex: 1;
-  padding: 0 20px;
+  padding: 10px 20px;
 }
 
 .line {
@@ -38,4 +38,8 @@
 
 .btnWrapper .switch {
   margin-right: 12px;
+}
+
+.remeber {
+  color: green !important;
 }

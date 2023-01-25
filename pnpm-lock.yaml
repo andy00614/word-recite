@@ -7,12 +7,15 @@ specifiers:
   '@types/react': 18.0.27
   '@types/react-dom': 18.0.10
   antd: 4.24.5
+  classnames: ^2.3.2
+  clsx: ^1.2.1
   eslint: 8.32.0
   eslint-config-next: 13.1.2
   next: 13.1.2
   pdf-parse: ^1.1.1
   react: 18.2.0
   react-dom: 18.2.0
+  store2: ^2.14.2
   typescript: 4.9.4
 
 dependencies:
@@ -20,12 +23,15 @@ dependencies:
   '@types/react': 18.0.27
   '@types/react-dom': 18.0.10
   antd: 4.24.5_biqbaboplfbrettd7655fr4n2y
+  classnames: 2.3.2
+  clsx: 1.2.1
   eslint: 8.32.0
   eslint-config-next: 13.1.2_7uibuqfxkfaozanbtbziikiqje
   next: 13.1.2_biqbaboplfbrettd7655fr4n2y
   pdf-parse: 1.1.1
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
+  store2: 2.14.2
   typescript: 4.9.4
 
 devDependencies:
@@ -626,6 +632,11 @@ packages:
 
   /client-only/0.0.1:
     resolution: {integrity: sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==}
+    dev: false
+
+  /clsx/1.2.1:
+    resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
+    engines: {node: '>=6'}
     dev: false
 
   /color-convert/2.0.1:
@@ -2655,6 +2666,10 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       internal-slot: 1.0.4
+    dev: false
+
+  /store2/2.14.2:
+    resolution: {integrity: sha512-siT1RiqlfQnGqgT/YzXVUNsom9S0H1OX+dpdGN1xkyYATo4I6sep5NmsRD/40s3IIOvlCq6akxkqG82urIZW1w==}
     dev: false
 
   /string-convert/0.2.1:
